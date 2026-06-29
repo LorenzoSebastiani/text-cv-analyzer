@@ -55,6 +55,7 @@ export const uploadDocument = async (req: Request, res: Response) => {
         }
 
         // 6. Risposta
+        console.log('documentId:', documentId)
         res.status(201).json({
             documentId,
             reviewId,

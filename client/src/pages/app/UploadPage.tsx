@@ -27,6 +27,8 @@ const UploadPage = () => {
 
         const result = await uploadDocument(text)
 
+        console.log('result:', result)
+
         setLoading(false)
 
         if (result) {
