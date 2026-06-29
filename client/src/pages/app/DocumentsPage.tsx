@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Button, Card, Input, Tag, Typography, Empty } from 'antd'
+import { Button, Card, Input, Tag, Typography, Empty, Popconfirm, message } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import {
   FileTextOutlined,
   SearchOutlined,
   PlusOutlined,
   CalendarOutlined,
+  DeleteOutlined,
 } from '@ant-design/icons'
 import { useDocument } from '../../context/DocumentContext'
 
@@ -13,7 +14,7 @@ const { Title, Text, Paragraph } = Typography
 
 const DocumentsPage = () => {
   const navigate = useNavigate()
-  const { documentList, getDocuments } = useDocument()!
+  const { documentList, getDocuments, deleteDocument } = useDocument()!
   const [search, setSearch] = useState('')
 
   useEffect(() => {
@@ -155,9 +156,38 @@ const DocumentsPage = () => {
                 >
                   {doc.overall_score ? `${doc.overall_score}/10` : 'N/D'}
                 </Tag>
-                <Text style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600 }}>
-                  Vedi dettaglio →
-                </Text>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <Text style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600 }}>
+                    Vedi dettaglio →
+                  </Text>
+                  <Popconfirm
+                    title="Eliminare questo documento?"
+                    description="L'operazione non è reversibile."
+                    okText="Elimina"
+                    cancelText="Annulla"
+                    okButtonProps={{ danger: true }}
+                    onConfirm={async (e) => {
+                      e?.stopPropagation()
+                      const result = await deleteDocument(doc.id)
+                      if (result) {
+                        message.success('Documento eliminato')
+                        await getDocuments()
+                      } else {
+                        message.error('Errore durante l\'eliminazione')
+                      }
+                    }}
+                  >
+                    <Button
+                      size="small"
+                      icon={<DeleteOutlined />}
+                      danger
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      style={{ borderRadius: 6 }}
+                    />
+                  </Popconfirm>
+                </div>
               </div>
             </Card>
           ))}

@@ -1,21 +1,22 @@
 import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Button, Card, Tag, Typography, Divider, Progress, Spin } from 'antd'
+import { Button, Card, Tag, Typography, Divider, Progress, Spin, message } from 'antd'
 import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
   FileTextOutlined,
   BulbOutlined,
+  CopyOutlined,
 } from '@ant-design/icons'
 import { useDocument } from '../../context/DocumentContext'
 
 const { Title, Text, Paragraph } = Typography
 
 const typeConfig: Record<string, { color: string; label: string }> = {
-  grammar:   { color: 'red',    label: 'Grammatica' },
-  style:     { color: 'blue',   label: 'Stile' },
+  grammar: { color: 'red', label: 'Grammatica' },
+  style: { color: 'blue', label: 'Stile' },
   structure: { color: 'orange', label: 'Struttura' },
-  content:   { color: 'purple', label: 'Contenuto' },
+  content: { color: 'purple', label: 'Contenuto' },
 }
 
 const DocumentPage = () => {
@@ -26,10 +27,10 @@ const DocumentPage = () => {
   useEffect(() => {
     console.log('id:', id)
     if (id) getDocumentById(id)
-}, [id])
+  }, [id])
 
 
-console.log('currentDocument:', currentDocument)
+  console.log('currentDocument:', currentDocument)
 
   if (!currentDocument) {
     return (
@@ -121,10 +122,32 @@ console.log('currentDocument:', currentDocument)
 
         <Card
           title={
-            <span style={{ fontWeight: 700 }}>
-              <CheckCircleOutlined style={{ marginRight: 8, color: '#52c41a' }} />
-              Testo revisionato
-            </span>
+            <div >
+              <span style={{ fontWeight: 700 }}>
+                <CheckCircleOutlined style={{ marginRight: 8, color: '#52c41a' }} />
+                Testo revisionato
+              </span>
+              <Button
+                icon={<CopyOutlined />}
+                size="small"
+                onClick={() =>
+                  navigator.clipboard
+                    .writeText(review.revised_text)
+                    .then(() => message.success('Testo copiato!'))
+                }
+                style={{
+                  marginLeft: 12,
+                  borderRadius: 6,
+                  border: '1px solid rgba(82,196,26,0.3)',
+                  color: '#52c41a',
+                  fontSize: 12,
+                  fontWeight: 600,
+                }}
+              >
+                Copia
+              </Button>
+            </div>
+
           }
           style={{
             borderRadius: 14,

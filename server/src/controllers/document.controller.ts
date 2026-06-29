@@ -140,3 +140,40 @@ export const getDocumentById = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Errore interno del server' });
     }
 }
+
+export const deleteDocument = async (req: Request, res: Response) => {
+    try {
+        const token = req.headers.authorization?.split(" ")[1];
+        const payload = jwt.verify(token!, process.env.JWT_KEY!) as jwt.JwtPayload;
+        const userId = payload.userId;
+
+        const id = req.params.id
+
+        if (!id) {
+            return res.status(400).json({ error: 'ID mancante' })
+        }
+
+        // 1. Verifica che esista e appartenga all'utente
+        const docResult = await pool.query(
+            'SELECT id, user_id FROM documents WHERE id = $1',
+            [id]
+        )
+
+        if (docResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Documento non trovato' })
+        }
+
+        if (docResult.rows[0].user_id !== userId) {
+            return res.status(403).json({ error: 'Accesso negato' })
+        }
+
+        // 2. Elimina
+        await pool.query('DELETE FROM documents WHERE id = $1', [id])
+
+        return res.status(204).send()
+
+    } catch (error) {
+        console.error('Errore deleteDocument:', error);
+        res.status(500).json({ error: 'Errore interno del server' });
+    }
+}

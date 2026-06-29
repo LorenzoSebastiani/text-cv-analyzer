@@ -9,6 +9,7 @@ interface DocumentContextReturn {
     uploadDocument: (text?: string, document?: FormData) => any;
     getDocuments: () => Promise<Document[] | null> | null;
     getDocumentById: (id: string) => any;  
+    deleteDocument: (id: string) => any;
 }
 
 interface Props {
@@ -90,8 +91,29 @@ export const DocumentProvider = ({children}: Props) => {
         }
     }
 
+    const deleteDocument = async (id: string) => {
+        if(!serverApi) return null;
+
+        try {
+            setLoading(true);
+
+            const {status} = await serverApi.delete(`documents/${id}`);
+            
+            if(status=== 204){
+                return 'success'
+            }
+
+            return null;
+        } catch (error) {
+            console.error('Error deleteDocument axios: ', error);
+            return null;
+        } finally {
+            setLoading(false);
+        }
+    }
+
     return (
-        <DocumentContext.Provider value={{loading, documentList, currentDocument, uploadDocument, getDocuments, getDocumentById}} >
+        <DocumentContext.Provider value={{loading, documentList, currentDocument, uploadDocument, getDocuments, getDocumentById, deleteDocument}} >
             {children}
         </DocumentContext.Provider>
     )
