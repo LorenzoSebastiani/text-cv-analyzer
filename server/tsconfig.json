@@ -5,7 +5,8 @@
     "outDir": "./dist",
 
     // Environment Settings
-    "module": "commonjs",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "target": "es2020",
     "esModuleInterop": true,
     "lib": ["esnext"],

@@ -1,4 +1,4 @@
-import pdf from 'pdf-parse-fork'
+import PDFParser from 'pdf2json'
 
 interface PDFData {
     text: string
@@ -7,10 +7,29 @@ interface PDFData {
 }
 
 export const extractText = async (buffer: Buffer): Promise<PDFData> => {
-    try {
-        return await pdf(buffer);
-    } catch (error) {
-        console.error('Errore durante il parsing del PDF:', error);
-        throw error
-    }
+    return new Promise((resolve, reject) => {
+        const pdfParser = new (PDFParser as any)()
+
+        pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
+            const text = pdfParser.getRawTextContent()
+            console.log('Testo estratto:', text?.slice(0, 200))
+            console.log('Lunghezza:', text?.length)
+            resolve({
+                text,
+                numpages: pdfData.Pages?.length ?? 0,
+                info: {}
+            })
+        })
+
+        pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
+            const text = pdfParser.getRawTextContent()
+            resolve({
+                text,
+                numpages: pdfData.Pages?.length ?? 0,
+                info: {}
+            })
+        })
+
+        pdfParser.parseBuffer(buffer)
+    })
 }

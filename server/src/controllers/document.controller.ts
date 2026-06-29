@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import { extractText } from '../services/pdf.service';
-import pool from '../db';
+import { extractText } from '../services/pdf.service.js';
+import pool from '../db/index.js';
 import jwt from 'jsonwebtoken'
-import { analyzeText } from '../services/ai.service';
+import { analyzeText } from '../services/ai.service.js';
 
 export const uploadDocument = async (req: Request, res: Response) => {
     try {
@@ -16,7 +16,12 @@ export const uploadDocument = async (req: Request, res: Response) => {
 
         if (req.file?.mimetype === 'application/pdf') {
             const result = await extractText(req.file.buffer);
-            originalText = result?.text!;
+
+            if (!result?.text || result.text.trim() === '') {
+                return res.status(400).json({ error: 'Impossibile estrarre testo dal PDF. Prova con un file diverso.' })
+            }
+
+            originalText = result.text;
             filename = req.file.originalname;
         } else if (req.body.text) {
             originalText = req.body.text;
@@ -87,6 +92,10 @@ export const getDocumentById = async (req: Request, res: Response) => {
         const userId = payload.userId;
 
         const id = req.params.id
+
+        if (!id) {
+            return res.status(400).json({ error: 'ID mancante' })
+        }
 
         // 1. Documento
         const docResult = await pool.query(
